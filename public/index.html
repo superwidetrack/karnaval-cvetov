@@ -2564,46 +2564,70 @@ button {
         if (btn) openModal(parseInt(btn.dataset.id));
     });
 
-    // Modal form submit
-    modalForm.addEventListener('submit', (e) => {
+    // Modal form submit — отправка заказа на почту
+    modalForm.addEventListener('submit', async (e) => {
         e.preventDefault();
+        const btn = modalForm.querySelector('button[type="submit"]');
+        btn.disabled = true;
+        btn.textContent = 'Отправка...';
+
         const data = Object.fromEntries(new FormData(modalForm));
         data.product = document.getElementById('modalName').textContent;
         data.price = document.getElementById('modalPrice').textContent;
-        data.timestamp = new Date().toISOString();
 
-        console.log('Order submitted:', data);
-
-        // Save to localStorage
-        const orders = JSON.parse(localStorage.getItem('carnival_orders') || '[]');
-        orders.push(data);
-        localStorage.setItem('carnival_orders', JSON.stringify(orders));
-
-        modalForm.style.display = 'none';
-        modalProduct.style.display = 'none';
-        modalSuccess.classList.add('show');
+        try {
+            const resp = await fetch('/api/order', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            const result = await resp.json();
+            if (result.success) {
+                modalForm.style.display = 'none';
+                modalProduct.style.display = 'none';
+                modalSuccess.classList.add('show');
+            } else {
+                alert('Ошибка при отправке. Позвоните нам: +7 (921) 499-06-50');
+            }
+        } catch (err) {
+            alert('Ошибка соединения. Позвоните нам: +7 (921) 499-06-50');
+        }
+        btn.disabled = false;
+        btn.textContent = 'Оформить заказ';
     });
 
     /* ========================================
-       CTA FORM
+       CTA FORM — заявка на обратный звонок
        ======================================== */
     const ctaForm = document.getElementById('ctaForm');
     const ctaSuccess = document.getElementById('ctaSuccess');
 
-    ctaForm.addEventListener('submit', (e) => {
+    ctaForm.addEventListener('submit', async (e) => {
         e.preventDefault();
+        const btn = ctaForm.querySelector('button[type="submit"]');
+        btn.disabled = true;
+        btn.textContent = 'Отправка...';
+
         const data = Object.fromEntries(new FormData(ctaForm));
-        data.type = 'callback';
-        data.timestamp = new Date().toISOString();
 
-        console.log('Callback request:', data);
-
-        const requests = JSON.parse(localStorage.getItem('carnival_callbacks') || '[]');
-        requests.push(data);
-        localStorage.setItem('carnival_callbacks', JSON.stringify(requests));
-
-        ctaForm.style.display = 'none';
-        ctaSuccess.classList.add('show');
+        try {
+            const resp = await fetch('/api/callback', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            const result = await resp.json();
+            if (result.success) {
+                ctaForm.style.display = 'none';
+                ctaSuccess.classList.add('show');
+            } else {
+                alert('Ошибка при отправке. Позвоните нам: +7 (921) 499-06-50');
+            }
+        } catch (err) {
+            alert('Ошибка соединения. Позвоните нам: +7 (921) 499-06-50');
+        }
+        btn.disabled = false;
+        btn.textContent = 'Отправить заявку';
     });
 
     /* ========================================

@@ -9,12 +9,14 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Nodemailer transporter
+// Nodemailer transporter (Yandex SMTP)
 const transporter = nodemailer.createTransport({
-    service: 'gmail',
+    host: 'smtp.yandex.ru',
+    port: 465,
+    secure: true,
     auth: {
-        user: process.env.GMAIL_USER,
-        pass: process.env.GMAIL_PASS
+        user: process.env.YANDEX_USER,
+        pass: process.env.YANDEX_PASS
     }
 });
 
@@ -40,8 +42,8 @@ app.post('/api/order', async (req, res) => {
         `;
 
         await transporter.sendMail({
-            from: `"Карнавал Цветов" <${process.env.GMAIL_USER}>`,
-            to: 'buket.29roz@gmail.com',
+            from: `"Карнавал Цветов" <${process.env.YANDEX_USER}>`,
+            to: 'info@29roz.ru',
             subject: `Заказ: ${product || 'Букет'} — ${name || 'Клиент'}`,
             html: html
         });
@@ -70,8 +72,8 @@ app.post('/api/callback', async (req, res) => {
         `;
 
         await transporter.sendMail({
-            from: `"Карнавал Цветов" <${process.env.GMAIL_USER}>`,
-            to: 'buket.29roz@gmail.com',
+            from: `"Карнавал Цветов" <${process.env.YANDEX_USER}>`,
+            to: 'info@29roz.ru',
             subject: `Заявка: ${name || 'Клиент'} — ${phone || 'нет телефона'}`,
             html: html
         });
